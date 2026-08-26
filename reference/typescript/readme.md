@@ -1,63 +1,67 @@
-# BotLog TypeScript Validator - Tier 1 $500 Bounty Implementation
+# BotLog TypeScript Merkle Tree - Tier 2 $1000 Bounty Implementation
 
 ## Overview
-This PR implements the **Log Validator in TypeScript/JavaScript** as described in the README Tier 1 $500 bounty.
+This PR implements the Merkle Tree Batch Validator in TypeScript/JavaScript as described in the README Tier 2 $1000 bounty.
 
 ## Features Implemented
-- ✅ **Ed25519 Signing** using `@noble/ed25519` (same as Python ref impl uses PyNaCl)
-- ✅ **SHA-256 Hashing** using `@noble/hashes` (built-in equivalent)
-- ✅ **RFC 8785 Canonical JSON** - deterministic key sorting for verifiable hashing
-- ✅ **Single Entry Verification** - signature + log_hash validation
-- ✅ **Chain Verification** - hash chain integrity + timestamp monotonicity per actor
-- ✅ **Tamper Detection** - detects broken chain, fake previous_hash, timestamp regression
+✅ Merkle Tree Construction - SHA-256 hash chaining
+✅ Proof Generation - getProof(index) returns {leaf, proof, root, index}
+✅ Single Proof Verification - verifyProof(proof) with clean signature
+✅ Batch Verification - verifyBatch with single root vs N hashes (efficient!)
+✅ BotLog Integration - buildBotlogMerkleTree(logHashes) for log batching
+✅ Tamper Detection - detects invalid proofs, wrong root, modified leaves
 
 ## Structure
-```
 reference/typescript/
-├── botlog.ts      # Core validator (BotLogEntry class + verifyChain)
-├── example.ts     # 3-entry chain demo (human -> human -> ai)
-├── test.ts        # 4 unit tests
-├── package.json   # Dependencies
-└── README.md      # This file
-```
+├── botlog.ts           # Core validator (from Tier 1 $500)
+├── merkle.ts           # Merkle Tree implementation (NEW - Tier 2)
+├── example.ts          # Tier 1 demo
+├── example-merkle.ts   # Merkle Tree demo (NEW - Tier 2)
+├── package.json
+├── readme.md           # This file (Tier 2)
+└── readme-merkle.md    # Merkle Tree docs
 
 ## How to Test
-```bash
 cd reference/typescript
 npm install
-npm run test  # 4 tests should pass
-npm run demo  # Chain verification: PASSED
-```
+npm run test:merkle  # Merkle tests
+npm run demo:merkle  # Merkle demo: Batch verification PASSED
+
+## Efficiency
+Merkle Tree allows batch verification:
+- 1 root (64 chars) vs N hashes (N*64 chars)
+- Verify 1000 logs with 1 hash instead of 1000!
 
 ## Compliance with Spec
-Matches `reference/python/botlog-mini/botlog.py` behavior:
-- Same action types: propose|commit|execute|verify|dispute
-- Same actor types: human|ai
-- Same hashing: previous_hash + signature + canonical payload
-- Same verification rules from README
+Matches Tier 2 requirements:
+
+- Build Merkle Tree from log hashes
+- Generate inclusion proofs
+- Verify single proof: verifyProof(proof)
+- Verify batch with single root
+- Integration with BotLog protocol
 
 ## Example Usage
-```typescript
-import { BotLogEntry, generateKeypair, publicKeyToBase64, verifyChain, getCurrentTimestamp } from './botlog.js';
+import { MerkleTree, buildBotlogMerkleTree } from './merkle.js';
 
-const { privateKey, publicKey } = await generateKeypair();
-const pubKeyB64 = publicKeyToBase64(publicKey);
+const entries = ['log1', 'log2', 'log3', 'log4'];
+const tree = new MerkleTree(entries);
+console.log('Root:', tree.getRoot());
 
-const entry = new BotLogEntry({
-  version: '1.0',
-  timestamp: getCurrentTimestamp(),
-  actor: { type: 'human', id: 'KullAxel', public_key: pubKeyB64 },
-  action: { type: 'propose', description: 'Launch campaign' },
-  previous_hash: null,
-});
-await entry.sign(privateKey);
-console.log(entry.toJSON());
-```
+const proof = tree.getProof(2);
+const isValid = MerkleTree.verifyProof(proof);
+console.log('Valid:', isValid);
+
+// Batch verification
+const proofs = [0, 2].map(i => tree.getProof(i));
+const allValid = proofs.every(p => MerkleTree.verifyProof(p));
+console.log('Batch:', allValid);
 
 ## Bounty Claim
-**Claiming Tier 1 ($500) - Log Validator in TypeScript/JavaScript**
+Claiming Tier 2 ($1000) - Merkle Tree Batch Validator in TypeScript/JavaScript
+
+Includes Tier 1 ($500) + Tier 2 ($1000) = $1500 total
 
 Payout via Polar.sh or GitHub Sponsors as mentioned in README.
-My Polar.sh: [add your link] / GitHub Sponsors: [add your link]
 
 Ready for review! 🚀
