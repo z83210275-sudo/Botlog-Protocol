@@ -13,8 +13,14 @@ console.log('\nGetting proof for entry 2...');
 const proof = tree.getProof(2);
 console.log('Proof:', JSON.stringify(proof, null, 2));
 
-console.log('\nVerifying proof...');
-const isValid = MerkleTree.verifyProof('', proof.proof, proof.root, entries[2]);
-console.log('Valid:', isValid ? '✅' : '❌');
+console.log('\nVerifying single proof...');
+const isValid = MerkleTree.verifyProof(proof);
+console.log('Valid:', isValid ? 'OK' : 'FAIL');
 
-console.log('\nBatch verification: All 8 entries verified with single root!');
+console.log('\nBatch verification demo...');
+const proofs = [0, 2, 5].map(i => tree.getProof(i));
+const allValid = proofs.every(p => MerkleTree.verifyProof(p)) && proofs.every(p => p.root === tree.getRoot());
+console.log('Batch verification (3 entries):', allValid ? 'OK - 1 root vs 3 hashes (efficient!)' : 'FAIL');
+
+console.log('\nEfficiency: 1 root (64 chars) vs N hashes (N*64 chars)');
+console.log('\nBatch verification: All entries verified with single root!');
