@@ -1,0 +1,20 @@
+[package]
+name = "botlog-rs"
+version = "0.1.0"
+edition = "2021"
+description = "BotLog Protocol - Rust Log Validator - Tier 1 $500 bounty"
+license = "MIT"
+repository = "https://github.com/KullAxel/BotLog-Protocol"
+
+[dependencies]
+ed25519-dalek = { version = "2.0", features = ["rand_core"] }
+sha2 = "0.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+base64 = "0.22"
+rand = "0.8"
+chrono = { version = "0.4", features = ["serde"] }
+
+[[bin]]
+name = "example_chain"
+path = "src/main.rs"
